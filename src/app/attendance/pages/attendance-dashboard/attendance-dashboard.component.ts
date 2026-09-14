@@ -5,9 +5,9 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AttendanceService } from '../../services/attendance.service';
 import { CourseService } from '../../../courses/services/course.service';
 import { Course } from '../../../courses/models/course.models';
-import { AttendanceSession } from '../../models/attendance.models';
 import { NotificationService } from '../../../core/services/notification.service';
 import { QrGenerator } from '../../../core/utils/qr-generator';
+import { environment } from '../../../../environments/environment';
 
 // Componente para el panel de control de asistencia de la clase, generacion y descarga de QR
 @Component({
@@ -285,11 +285,7 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
     const session = this.attendanceService.activeSession();
     if (!session || !this.qrCanvas?.nativeElement) return;
 
-    const hostname = window.location.hostname;
-    const port = window.location.port ? `:${window.location.port}` : '';
-    const protocol = window.location.protocol;
-    const qrUrl = `${protocol}//${hostname}${port}/asistencia/${session.sessionToken}`;
-
+    const qrUrl = this.getQrFullUrl();
     QrGenerator.drawQrToCanvas(this.qrCanvas.nativeElement, qrUrl, 380);
   }
 
@@ -307,10 +303,8 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
   getQrFullUrl(): string {
     const session = this.attendanceService.activeSession();
     if (!session) return '';
-    const hostname = window.location.hostname;
-    const port = window.location.port ? `:${window.location.port}` : '';
-    const protocol = window.location.protocol;
-    return `${protocol}//${hostname}${port}/asistencia/${session.sessionToken}`;
+    const baseUrl = environment.publicAppUrl || `${window.location.protocol}//${window.location.host}`;
+    return `${baseUrl}/asistencia/${session.sessionToken}`;
   }
 
   // Copia el enlace de asistencia al portapapeles
