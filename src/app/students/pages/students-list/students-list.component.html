@@ -1,0 +1,556 @@
+<div class="students-page-container">
+  <!-- Encabezado principal -->
+  <div class="page-top-header">
+    <div class="header-left">
+      <h2 class="page-main-title">Alumnos y Asistencia</h2>
+    </div>
+
+    @if (currentCourse()) {
+      <div class="header-right-actions">
+        <button type="button" class="btn-action-qr" (click)="goToAttendance()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2"/>
+            <path d="M7 7h.01"/>
+            <path d="M17 7h.01"/>
+            <path d="M7 17h.01"/>
+            <path d="M17 17h.01"/>
+          </svg>
+          <span>Tomar Asistencia (QR)</span>
+        </button>
+
+        <button type="button" class="btn-add-student" (click)="openCreateModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>Registrar Alumno</span>
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Selector de Curso animado con opción de limpiar -->
+  <div class="course-selector-card">
+    <div class="selector-field-row">
+      <label class="selector-field-label">Curso</label>
+      <div class="custom-select-box">
+        <button
+          type="button"
+          class="custom-select-trigger"
+          [class.open]="isCourseDropdownOpen()"
+          (click)="toggleCourseDropdown($event)">
+          <span class="selected-course-label" [class.placeholder-text]="!currentCourse()">
+            {{ currentCourse() ? (currentCourse()!.name + ' — ' + currentCourse()!.section) : 'Seleccionar curso' }}
+          </span>
+
+          <div class="trigger-actions">
+            @if (currentCourse()) {
+              <span
+                class="btn-clear-trigger"
+                (click)="clearSelection($event)"
+                title="Limpiar selección">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </span>
+            }
+            <svg class="select-chevron" [class.rotated]="isCourseDropdownOpen()" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </div>
+        </button>
+
+        @if (isCourseDropdownOpen()) {
+          <div class="custom-select-dropdown" (click)="$event.stopPropagation()">
+            @for (course of courseService.courses(); track course.id) {
+              <div
+                class="custom-select-option"
+                [class.selected]="course.id === courseId()"
+                (click)="onSelectCourse(course)">
+                <span>{{ course.name }} — {{ course.section }}</span>
+                @if (course.id === courseId()) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0b57d0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (!currentCourse()) {
+    <div class="empty-selection-card">
+      <div class="empty-icon-circle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0b57d0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+          <path d="M6 6h10"/>
+          <path d="M6 10h10"/>
+        </svg>
+      </div>
+      <h3 class="empty-title">Selecciona un curso</h3>
+      <p class="empty-subtitle">Elige un curso del menú desplegable superior para ver los alumnos registrados y tomar asistencia.</p>
+    </div>
+  } @else {
+    <!-- Panel de Metricas KPI Limpio y Ordenado -->
+    <div class="kpi-stats-card">
+      <div class="kpi-item">
+        <span class="kpi-label">Total Alumnos</span>
+        <span class="kpi-value">{{ studentService.students().length }}</span>
+      </div>
+
+      <div class="kpi-divider"></div>
+
+      <div class="kpi-item">
+        <span class="kpi-label">Enrolados</span>
+        <span class="kpi-value">{{ enrolledStudentsCount() }}</span>
+      </div>
+
+      <div class="kpi-divider"></div>
+
+      <div class="kpi-item">
+        <span class="kpi-label">Pendientes</span>
+        <span class="kpi-value">{{ pendingStudentsCount() }}</span>
+      </div>
+    </div>
+
+  <!-- Estado de carga -->
+  @if (studentService.isLoading()) {
+    <div class="loading-state">
+      <span>Cargando alumnos...</span>
+    </div>
+  }
+
+  <!-- Estado vacio minimalista y limpio -->
+  @if (!studentService.isLoading() && studentService.students().length === 0) {
+    <div class="empty-students-card">
+      <div class="empty-icon-circle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0b57d0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <h3 class="empty-title">Sin alumnos registrados</h3>
+      <p class="empty-subtitle">Usa el botón superior para registrar alumnos y enrolar sus rostros.</p>
+    </div>
+  }
+
+  <!-- Lista de Alumnos: Vista Desktop (Tabla) y Vista Movil (Tarjetas) -->
+  @if (!studentService.isLoading() && studentService.students().length > 0) {
+    <!-- Vista Tabla para Pantallas Medianas y Grandes -->
+    <div class="table-container desktop-table-view">
+      <table class="students-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Alumno</th>
+            <th>Correo Institucional</th>
+            <th>Biometría Facial</th>
+            <th class="th-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (student of studentService.students(); track student.id) {
+            <tr>
+              <td class="td-code">{{ student.code }}</td>
+              <td class="td-name">
+                <span class="student-fullname">{{ student.firstName }} {{ student.lastName }}</span>
+              </td>
+              <td class="td-email">{{ student.email || '-' }}</td>
+              <td class="td-status">
+                @if (student.hasFaceDescriptor) {
+                  <span class="badge-status badge-enrolled">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Enrolado
+                  </span>
+                } @else {
+                  <span class="badge-status badge-pending">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="12" y1="8" x2="12" y2="12"/>
+                      <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    Pendiente
+                  </span>
+                }
+              </td>
+              <td class="td-actions">
+                <button
+                  type="button"
+                  class="btn-row-action btn-scan-face"
+                  (click)="openCameraModal(student)"
+                  [title]="student.hasFaceDescriptor ? 'Re-enrolar rostro' : 'Enrolar rostro con cámara'">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+                    <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+                    <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+                    <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  <span>{{ student.hasFaceDescriptor ? 'Re-enrolar' : 'Enrolar' }}</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-row-action btn-edit-student"
+                  (click)="openEditModal(student)"
+                  title="Editar datos del alumno">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                    <path d="m15 5 4 4"/>
+                  </svg>
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-row-action btn-delete-student"
+                  (click)="requestDelete(student)"
+                  title="Eliminar alumno">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Vista Tarjetas para Pantallas Moviles -->
+    <div class="mobile-cards-view">
+      @for (student of studentService.students(); track student.id) {
+        <div class="student-card-mobile">
+          <div class="st-card-top">
+            <div class="st-card-info">
+              <h4 class="st-card-name">{{ student.firstName }} {{ student.lastName }}</h4>
+              <div class="st-card-tags">
+                <span class="st-code-pill">COD: {{ student.code }}</span>
+                @if (student.email) {
+                  <span class="st-email-text">{{ student.email }}</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="st-card-bottom">
+            <div class="st-status-wrapper">
+              @if (student.hasFaceDescriptor) {
+                <span class="badge-status badge-enrolled">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <span>Enrolado</span>
+                </span>
+              } @else {
+                <span class="badge-status badge-pending">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  <span>Pendiente</span>
+                </span>
+              }
+            </div>
+
+            <div class="st-actions-group">
+              <button
+                type="button"
+                class="btn-row-action btn-scan-face"
+                (click)="openCameraModal(student)"
+                [title]="student.hasFaceDescriptor ? 'Re-enrolar rostro' : 'Enrolar rostro con cámara'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+                  <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+                  <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+                  <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>{{ student.hasFaceDescriptor ? 'Re-enrolar' : 'Enrolar' }}</span>
+              </button>
+
+              <button
+                type="button"
+                class="btn-row-action btn-edit-student"
+                (click)="openEditModal(student)"
+                title="Editar datos del alumno">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                  <path d="m15 5 4 4"/>
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                class="btn-row-action btn-delete-student"
+                (click)="requestDelete(student)"
+                title="Eliminar alumno">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+}
+</div>
+
+<!-- Modal para Registro / Edicion de Alumno -->
+@if (isStudentModalOpen()) {
+  <div class="modal-backdrop" (click)="closeStudentModal()">
+    <div class="modal-card modal-student" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">{{ isEditMode() ? 'Editar Alumno' : 'Registrar Nuevo Alumno' }}</h3>
+        <button type="button" class="btn-close-modal" (click)="closeStudentModal()" aria-label="Cerrar modal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <form [formGroup]="studentForm" (ngSubmit)="onSubmitStudent()" class="modal-form" autocomplete="off">
+        @if (studentError()) {
+          <div class="alert-error-banner">
+            {{ studentError() }}
+          </div>
+        }
+
+        <!-- Campo 1: Codigo Universitario -->
+        <div class="form-field">
+          <div class="google-input-box">
+            <input
+              id="studentCode"
+              type="text"
+              class="google-input"
+              formControlName="code"
+              placeholder=" "
+              autocomplete="off"
+              [class.input-invalid]="studentForm.get('code')?.invalid && studentForm.get('code')?.touched">
+            <label
+              for="studentCode"
+              class="google-label"
+              [class.floating]="!!studentForm.get('code')?.value">
+              Código Universitario
+            </label>
+          </div>
+          @if (studentForm.get('code')?.invalid && studentForm.get('code')?.touched) {
+            <span class="field-error">El código universitario es obligatorio</span>
+          }
+        </div>
+
+        <!-- Campo 2: Nombres -->
+        <div class="form-field">
+          <div class="google-input-box">
+            <input
+              id="studentFirstName"
+              type="text"
+              class="google-input"
+              formControlName="firstName"
+              placeholder=" "
+              autocomplete="off"
+              [class.input-invalid]="studentForm.get('firstName')?.invalid && studentForm.get('firstName')?.touched">
+            <label
+              for="studentFirstName"
+              class="google-label"
+              [class.floating]="!!studentForm.get('firstName')?.value">
+              Nombres
+            </label>
+          </div>
+          @if (studentForm.get('firstName')?.invalid && studentForm.get('firstName')?.touched) {
+            <span class="field-error">El nombre es obligatorio</span>
+          }
+        </div>
+
+        <!-- Campo 3: Apellidos (Fila separada abajo) -->
+        <div class="form-field">
+          <div class="google-input-box">
+            <input
+              id="studentLastName"
+              type="text"
+              class="google-input"
+              formControlName="lastName"
+              placeholder=" "
+              autocomplete="off"
+              [class.input-invalid]="studentForm.get('lastName')?.invalid && studentForm.get('lastName')?.touched">
+            <label
+              for="studentLastName"
+              class="google-label"
+              [class.floating]="!!studentForm.get('lastName')?.value">
+              Apellidos
+            </label>
+          </div>
+          @if (studentForm.get('lastName')?.invalid && studentForm.get('lastName')?.touched) {
+            <span class="field-error">Los apellidos son obligatorios</span>
+          }
+        </div>
+
+        <!-- Campo 4: Correo Institucional -->
+        <div class="form-field">
+          <div class="google-input-box">
+            <input
+              id="studentEmail"
+              type="email"
+              class="google-input"
+              formControlName="email"
+              placeholder=" "
+              autocomplete="off">
+            <label
+              for="studentEmail"
+              class="google-label"
+              [class.floating]="!!studentForm.get('email')?.value">
+              Correo Institucional (Opcional)
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeStudentModal()" [disabled]="isSubmitting()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-save" [disabled]="isSubmitting() || studentForm.invalid">
+            {{ isSubmitting() ? 'Guardando...' : (isEditMode() ? 'Actualizar Alumno' : 'Guardar y Enrolar') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal de Enrolamiento Facial por Camara -->
+@if (isCameraModalOpen()) {
+  <div class="modal-backdrop" (click)="closeCameraModal()">
+    <div class="modal-card modal-camera-enrollment" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="camera-modal-title-group">
+          <h3 class="modal-title">Enrolamiento Biométrico</h3>
+          <span class="student-target-label">{{ enrollingStudent()?.firstName }} {{ enrollingStudent()?.lastName }} ({{ enrollingStudent()?.code }})</span>
+        </div>
+        <button type="button" class="btn-close-modal" (click)="closeCameraModal()" aria-label="Cerrar modal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="camera-body">
+        <!-- Indicadores de las 3 fases de enrolamiento -->
+        <div class="enrollment-phases-bar">
+          <div class="phase-step-chip" [class.active]="enrollPhase() === 'FRONT'" [class.done]="capturedFramesCount() >= 34">
+            <span class="step-num">1</span>
+            <span>Frente</span>
+          </div>
+          <div class="phase-step-chip" [class.active]="enrollPhase() === 'LEFT'" [class.done]="capturedFramesCount() >= 67">
+            <span class="step-num">2</span>
+            <span>Derecha</span>
+          </div>
+          <div class="phase-step-chip" [class.active]="enrollPhase() === 'RIGHT'" [class.done]="capturedFramesCount() >= 100">
+            <span class="step-num">3</span>
+            <span>Izquierda</span>
+          </div>
+        </div>
+
+        <div class="video-container">
+          <video #videoElement autoplay playsinline muted class="camera-feed"></video>
+          <canvas #meshCanvas class="mesh-canvas-overlay"></canvas>
+          <canvas #captureCanvas class="hidden-canvas"></canvas>
+
+          <!-- Guia visual ovalada para centrar el rostro con estado biometrico -->
+          <div
+            class="face-guide-overlay"
+            [class.scanning]="isCapturingBurst()"
+            [class.face-detected]="faceDetectionStatus().hasFace"
+            [class.face-missing]="!faceDetectionStatus().hasFace && isCapturingBurst()"
+            [class.success]="isEnrollmentSuccess()">
+            <div class="guide-oval"></div>
+          </div>
+
+          <div class="capture-overlay-info" [class.warning-state]="!faceDetectionStatus().hasFace">
+            <div class="pulse-indicator" [class.pulse-warning]="!faceDetectionStatus().hasFace"></div>
+            <span>{{ faceDetectionStatus().message }}</span>
+          </div>
+
+          @if (isEnrollmentSuccess()) {
+            <div class="enroll-success-overlay">
+              <div class="success-icon-badge">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <span class="success-text">Rostro Enrolado con Éxito</span>
+              <span class="success-subtext">3 ángulos verificados (100 capturas)</span>
+            </div>
+          }
+        </div>
+
+        <!-- Barra de progreso de ráfaga -->
+        @if (isCapturingBurst()) {
+          <div class="progress-bar-container">
+            <div class="progress-fill" [style.width.%]="captureProgress()"></div>
+          </div>
+        }
+
+        <p class="camera-instructions">
+          Sigue las 3 fases (frente, izquierda y derecha). Los puntos 3D validarán tu rostro automáticamente.
+        </p>
+
+        <div class="camera-actions">
+          <button type="button" class="btn-cancel" (click)="closeCameraModal()" [disabled]="isCapturingBurst()">
+            Cerrar
+          </button>
+          <button
+            type="button"
+            class="btn-start-burst"
+            (click)="startBurstCapture()"
+            [disabled]="isCapturingBurst() || isEnrollmentSuccess()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span>{{ isCapturingBurst() ? 'Enrolando...' : 'Iniciar Enrolamiento 3D' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal de Confirmacion para Eliminar Alumno -->
+@if (isDeleteModalOpen()) {
+  <div class="modal-backdrop" (click)="cancelDelete()">
+    <div class="modal-card modal-delete-confirm" (click)="$event.stopPropagation()">
+      <div class="delete-icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d93025" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        </svg>
+      </div>
+      <h3 class="delete-confirm-title">¿Eliminar alumno?</h3>
+      <p class="delete-confirm-desc">
+        Se eliminará a <strong>{{ studentToDelete()?.firstName }} {{ studentToDelete()?.lastName }}</strong> de este curso junto con sus registros.
+      </p>
+      <div class="delete-confirm-actions">
+        <button type="button" class="btn-cancel-del" (click)="cancelDelete()">
+          Cancelar
+        </button>
+        <button type="button" class="btn-confirm-del" (click)="confirmDelete()">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,253 @@
+<div class="dashboard-wrapper">
+  <!-- Notificaciones globales centradas -->
+  <app-notification-toast />
+
+  <!-- Overlay oscuro para dispositivos moviles al abrir sidebar -->
+  @if (isSidebarOpen()) {
+    <div class="mobile-backdrop" (click)="closeSidebar()"></div>
+  }
+
+  <!-- Notificacion / Modal de bienvenida centrado con fondo difuminado/empañado -->
+  @if (showWelcomeToast()) {
+    <div class="welcome-modal-backdrop" (click)="dismissToast()">
+      <div class="welcome-modal-card" (click)="$event.stopPropagation()">
+        <button type="button" class="btn-welcome-close" (click)="dismissToast()" aria-label="Cerrar bienvenida">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+
+        <div class="welcome-avatar-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0b57d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+
+        <h3 class="welcome-title">Bienvenido</h3>
+        <p class="welcome-name">{{ currentUser()?.fullName || 'Docente' }}</p>
+        <p class="welcome-desc">Sesion iniciada correctamente en el Sistema de Asistencia Facial.</p>
+
+        <button type="button" class="btn-welcome-continue" (click)="dismissToast()">
+          Continuar
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Barra Lateral (Sidebar) -->
+  <aside class="sidebar" [class.open]="isSidebarOpen()">
+    <div class="sidebar-header">
+      <div class="developer-brand">
+        <span class="brand-uix">UIX</span><span class="brand-cristian">CRISTIAN</span>
+      </div>
+      <p class="brand-subtitle">Asistencia Facial</p>
+    </div>
+
+    <!-- Informacion del profesor autenticado con opcion para editar perfil -->
+    <div class="user-profile-card" (click)="openProfileModal()" title="Clic para editar tu perfil y foto">
+      <div class="user-avatar">
+        @if (currentUser()?.profilePicture) {
+          <img [src]="currentUser()!.profilePicture" alt="Foto de perfil" class="user-avatar-img" />
+        } @else {
+          <span>{{ currentUser()?.fullName ? currentUser()!.fullName.charAt(0).toUpperCase() : 'P' }}</span>
+        }
+        <div class="avatar-edit-badge" title="Editar foto">
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+          </svg>
+        </div>
+      </div>
+      <div class="user-info">
+        <p class="user-name">{{ currentUser()?.fullName || 'Profesor' }}</p>
+      </div>
+      <button type="button" class="btn-user-edit" (click)="$event.stopPropagation(); openProfileModal()" aria-label="Editar perfil">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+          <path d="m15 5 4 4"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Navegacion de modulos -->
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Menu Principal</div>
+      <a
+        routerLink="/dashboard/courses"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-item"
+        (click)="closeSidebar()">
+        <!-- Icono de cursos -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+          <path d="M6 6h10"/>
+          <path d="M6 10h10"/>
+        </svg>
+        <span>Mis Cursos</span>
+      </a>
+
+      <a
+        routerLink="/dashboard/students"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeSidebar()">
+        <!-- Icono de alumnos y asistencia -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <circle cx="12" cy="10" r="3"/>
+          <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/>
+        </svg>
+        <span>Alumnos y Asistencia</span>
+      </a>
+
+      <a
+        routerLink="/dashboard/exports"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="closeSidebar()">
+        <!-- Icono de exportar documentos -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="8" y1="13" x2="16" y2="13"/>
+          <line x1="8" y1="17" x2="16" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        <span>Exportar Documentos</span>
+      </a>
+    </nav>
+
+    <!-- Pie del sidebar con cerrar sesion -->
+    <div class="sidebar-footer">
+      <button type="button" class="btn-logout" (click)="logout()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" x2="9" y1="12" y2="12"/>
+        </svg>
+        <span>Cerrar Sesion</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Contenedor de contenido principal -->
+  <div class="main-content">
+    <!-- Barra superior limpia con texto normal a la derecha -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button
+          type="button"
+          class="header-menu-btn"
+          (click)="toggleSidebar()"
+          title="Mostrar u ocultar menu lateral"
+          aria-label="Menu lateral">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="19" height="19" fill="currentColor">
+            <path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l256 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM416 448L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"/>
+          </svg>
+        </button>
+        <span class="system-brand-label">Sistema de Asistencia UCSS</span>
+      </div>
+
+      <!-- Texto limpio y normal a la derecha -->
+      <div class="topbar-right">
+        <span class="academic-text-clean">Gestion Academica</span>
+      </div>
+    </header>
+
+    <!-- Salida dinamica de vistas -->
+    <main class="content-body">
+      <router-outlet />
+    </main>
+  </div>
+
+  <!-- Modal para Editar Perfil y Foto del Usuario -->
+  @if (isProfileModalOpen()) {
+    <div class="profile-modal-overlay" (click)="closeProfileModal()">
+      <div class="profile-modal-card" (click)="$event.stopPropagation()">
+        <div class="profile-modal-header">
+          <h3 class="profile-modal-title">Editar Perfil</h3>
+          <button type="button" class="btn-close-modal" (click)="closeProfileModal()" aria-label="Cerrar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        @if (profileError()) {
+          <div class="profile-alert-error">
+            <span>{{ profileError() }}</span>
+          </div>
+        }
+
+        <div class="profile-avatar-section">
+          <div class="profile-avatar-circle">
+            @if (previewAvatar()) {
+              <img [src]="previewAvatar()!" alt="Vista previa" class="profile-avatar-preview" />
+            } @else {
+              <span class="avatar-initial-large">{{ profileName() ? profileName().charAt(0).toUpperCase() : 'P' }}</span>
+            }
+          </div>
+
+          <div class="avatar-actions-row">
+            <label class="btn-upload-avatar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span>Subir Foto</span>
+              <input type="file" accept="image/*" (change)="onAvatarFileSelected($event)" class="file-input-hidden" />
+            </label>
+
+            @if (previewAvatar()) {
+              <button type="button" class="btn-remove-avatar" (click)="removeAvatar()">
+                Quitar Foto
+              </button>
+            }
+          </div>
+        </div>
+
+        <form (ngSubmit)="saveProfile()" class="profile-form" autocomplete="off">
+          <div class="form-field">
+            <label class="field-label-standard">Nombre completo</label>
+            <input
+              type="text"
+              [ngModel]="profileName()"
+              (ngModelChange)="profileName.set($event)"
+              name="profileFullName"
+              placeholder="Ingresa tu nombre completo"
+              class="standard-input"
+              required />
+          </div>
+
+          <div class="form-field">
+            <label class="field-label-standard">Correo electrónico (solo lectura)</label>
+            <div class="readonly-input-box">
+              <input
+                type="text"
+                [value]="currentUser()?.email || ''"
+                disabled
+                class="standard-input input-disabled" />
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#747775" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lock-icon">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="profile-modal-actions">
+            <button type="button" class="btn-cancel" (click)="closeProfileModal()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-submit" [disabled]="isSavingProfile()">
+              <span>{{ isSavingProfile() ? 'Guardando...' : 'Guardar Cambios' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

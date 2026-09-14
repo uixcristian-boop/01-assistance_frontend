@@ -1,0 +1,415 @@
+<div class="attendance-page-container">
+  <!-- Encabezado superior limpio -->
+  <div class="page-top-header">
+    <div class="header-left">
+      <h2 class="page-main-title">Tomar Asistencia</h2>
+
+      <div class="course-header-card">
+        <div class="card-tags-group">
+          <span class="tag-badge tag-code">COD: {{ currentCourse()?.code }}</span>
+          <span class="tag-badge tag-section">Sección: {{ currentCourse()?.section }}</span>
+          @if (currentCourse()?.type) {
+            <span class="tag-badge tag-type">{{ currentCourse()?.type === 'O' ? 'Obligatorio' : 'Electivo' }}</span>
+          }
+        </div>
+        <h3 class="course-header-name">{{ currentCourse()?.name || 'Asistencia Facial de Clase' }}</h3>
+        @if (currentCourse()?.schedule) {
+          <div class="course-schedule-display">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span class="schedule-text">{{ currentCourse()?.schedule }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Pestañas Sesion Activa / Historial -->
+    <div class="segmented-tabs">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'active'"
+        (click)="setTab('active')">
+        Sesión Actual
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'history'"
+        (click)="setTab('history')">
+        Historial de Clases
+      </button>
+    </div>
+  </div>
+
+  <!-- Pestaña: Sesion Actual -->
+  @if (activeTab() === 'active') {
+    @if (attendanceService.activeSession(); as session) {
+      <!-- Panel de Sesion Activa Minimalista -->
+      <div class="active-session-banner">
+        <div class="session-title-wrap">
+          <div class="live-dot-pulse"></div>
+          <h3 class="session-banner-title">Sesión en Curso</h3>
+        </div>
+
+        <div class="session-actions-right">
+          <button type="button" class="btn-view-qr" (click)="openQrModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2"/>
+              <path d="M7 7h.01"/>
+              <path d="M17 7h.01"/>
+              <path d="M7 17h.01"/>
+              <path d="M17 17h.01"/>
+            </svg>
+            <span>Ver QR</span>
+          </button>
+
+          <button type="button" class="btn-close-session" (click)="onCloseActiveSession()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+            </svg>
+            <span>Finalizar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Metricas KPI Limpias y Ordenadas -->
+      <div class="kpi-stats-card">
+        <div class="kpi-item">
+          <span class="kpi-label">Total</span>
+          <span class="kpi-value">{{ session.totalStudents }}</span>
+        </div>
+
+        <div class="kpi-divider"></div>
+
+        <div class="kpi-item">
+          <span class="kpi-label">Presentes</span>
+          <span class="kpi-value">{{ session.presentCount }}</span>
+        </div>
+
+        <div class="kpi-divider"></div>
+
+        <div class="kpi-item">
+          <span class="kpi-label">Tardanzas</span>
+          <span class="kpi-value">{{ session.lateCount }}</span>
+        </div>
+
+        <div class="kpi-divider"></div>
+
+        <div class="kpi-item">
+          <span class="kpi-label">Faltas</span>
+          <span class="kpi-value">{{ session.absentCount }}</span>
+        </div>
+      </div>
+
+      <!-- Contenedor de Marcajes de Asistencia -->
+      <div class="table-card">
+        <div class="table-header-title">
+          <h4 class="table-title">Marcajes</h4>
+          <span class="auto-update-indicator">
+            <span class="update-pulse"></span>
+            En vivo
+          </span>
+        </div>
+
+        @if (session.records.length === 0) {
+          <div class="empty-records">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>Esperando marcajes de alumnos mediante QR...</span>
+          </div>
+        } @else {
+          <!-- Vista Tabla para Escritorio -->
+          <div class="records-table-container desktop-records-view">
+            <table class="records-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Alumno</th>
+                  <th>Hora</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (record of session.records; track record.id) {
+                  <tr>
+                    <td class="td-code">{{ record.studentCode }}</td>
+                    <td class="td-name">{{ record.studentName }}</td>
+                    <td class="td-time">{{ record.checkInTime | date:'shortTime' }}</td>
+                    <td class="td-status">
+                      @if (record.status === 'PRESENTE') {
+                        <span class="badge-record badge-presente">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                          Presente
+                        </span>
+                      } @else if (record.status === 'TARDANZA') {
+                        <span class="badge-record badge-tardanza">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                          </svg>
+                          Tardanza
+                        </span>
+                      } @else {
+                        <span class="badge-record badge-falta">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                          </svg>
+                          Falta
+                        </span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Vista Tarjetas para Dispositivos Moviles -->
+          <div class="mobile-records-view">
+            @for (record of session.records; track record.id) {
+              <div class="record-card-mobile">
+                <div class="rec-left-info">
+                  <div class="rec-avatar-placeholder">
+                    {{ record.studentName.charAt(0) }}
+                  </div>
+                  <div class="rec-user-data">
+                    <span class="rec-student-name">{{ record.studentName }}</span>
+                    <span class="rec-meta-details">COD: {{ record.studentCode }} • {{ record.checkInTime | date:'shortTime' }}</span>
+                  </div>
+                </div>
+
+                <div class="rec-right-status">
+                  @if (record.status === 'PRESENTE') {
+                    <span class="badge-record badge-presente">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Presente
+                    </span>
+                  } @else if (record.status === 'TARDANZA') {
+                    <span class="badge-record badge-tardanza">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                      </svg>
+                      Tardanza
+                    </span>
+                  } @else {
+                    <span class="badge-record badge-falta">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                      Falta
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Formulario para Iniciar Nueva Sesion -->
+      <div class="start-session-card">
+        <div class="start-session-header">
+          <h3 class="start-card-title">Iniciar Asistencia</h3>
+        </div>
+
+        <form (ngSubmit)="onStartSession()" class="start-form">
+          <div class="form-row">
+            <div class="form-group col-half">
+              <label class="form-label" for="startTimeDisplay">Hora de Inicio</label>
+              <div class="readonly-param-box">
+                <span class="param-value-text">{{ displayStartTime }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="form-group col-half">
+              <label class="form-label" for="endTimeDisplay">Hora de Fin</label>
+              <div class="readonly-param-box">
+                <span class="param-value-text">{{ displayEndTime }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-half">
+              <label class="form-label">Tolerancia (min)</label>
+              <div class="readonly-param-box">
+                <span class="param-value-text">15 min</span>
+              </div>
+            </div>
+
+            <div class="form-group col-half">
+              <label class="form-label">Tardanza (min)</label>
+              <div class="readonly-param-box">
+                <span class="param-value-text">30 min</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="start-form-actions">
+            <a [routerLink]="['/dashboard/courses', courseId(), 'students']" class="btn-cancel-action">
+              Volver
+            </a>
+            <button type="submit" class="btn-start-session" [disabled]="isStartingSession()">
+              <span>{{ isStartingSession() ? 'Iniciando...' : 'Iniciar Asistencia' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+  }
+
+  <!-- Pestaña: Historial de Clases -->
+  @if (activeTab() === 'history') {
+    <div class="history-container">
+      @if (attendanceService.sessionHistory().length === 0) {
+        <div class="empty-records">
+          <span>No hay sesiones de clase registradas anteriormente en este curso.</span>
+        </div>
+      } @else {
+        <div class="history-grid">
+          @for (histSession of attendanceService.sessionHistory(); track histSession.id) {
+            <div class="history-card">
+              <div class="history-header">
+                <div class="history-header-left">
+                  <span class="history-date">{{ formatHistoryDate(histSession.sessionDate) }}</span>
+                  <span class="history-time">{{ formatTimeTo12h(histSession.startTime) }} - {{ formatTimeTo12h(histSession.endTime) }}</span>
+                </div>
+                <button type="button" class="btn-card-delete" (click)="openDeleteModal(histSession, $event)" title="Eliminar sesión de asistencia">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="history-metrics">
+                <div class="h-metric"><span class="h-val">{{ histSession.presentCount }}</span><span class="h-lbl">Presentes</span></div>
+                <div class="h-metric"><span class="h-val">{{ histSession.lateCount }}</span><span class="h-lbl">Tardanzas</span></div>
+                <div class="h-metric"><span class="h-val">{{ histSession.absentCount }}</span><span class="h-lbl">Faltas</span></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="history-footer-actions">
+        <a [routerLink]="['/dashboard/courses', courseId(), 'students']" class="btn-cancel-action">
+          Volver a Alumnos
+        </a>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- MODAL DE CONFIRMACION PARA ELIMINAR SESION -->
+@if (sessionToDelete(); as sessionDel) {
+  <div class="confirm-modal-overlay" (click)="cancelDelete()">
+    <div class="confirm-modal-card" (click)="$event.stopPropagation()">
+      <div class="confirm-modal-header">
+        <div class="confirm-icon-box">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b3261e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+        </div>
+        <h4 class="confirm-title">¿Eliminar sesión?</h4>
+      </div>
+
+      <p class="confirm-text">
+        ¿Deseas quitar esta sesión del historial?
+        <span class="confirm-slot-highlight">{{ formatHistoryDate(sessionDel.sessionDate) }} • {{ formatTimeTo12h(sessionDel.startTime) }} - {{ formatTimeTo12h(sessionDel.endTime) }}</span>
+      </p>
+
+      <div class="confirm-actions">
+        <button type="button" class="btn-confirm-cancel" (click)="cancelDelete()" [disabled]="isDeletingSession()">
+          Cancelar
+        </button>
+        <button type="button" class="btn-confirm-delete" (click)="confirmDelete()" [disabled]="isDeletingSession()">
+          {{ isDeletingSession() ? 'Eliminando...' : 'Eliminar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal de Codigo QR Dinamico y Descarga -->
+@if (isQrModalOpen()) {
+  <div class="modal-backdrop" (click)="closeQrModal()">
+    <div class="modal-card modal-qr" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="qr-header-titles">
+          <h3 class="modal-title">Código QR de Asistencia</h3>
+          <span class="qr-course-sub">{{ currentCourse()?.name }} - Sección {{ currentCourse()?.section }}</span>
+        </div>
+        <button type="button" class="btn-close-modal" (click)="closeQrModal()" aria-label="Cerrar modal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="qr-modal-body">
+        <div class="qr-canvas-frame">
+          <canvas #qrCanvas class="qr-canvas"></canvas>
+        </div>
+
+        <div class="qr-instructions-box">
+          <p class="qr-inst-text">
+            Los alumnos deben escanear este código con su teléfono para abrir su cámara y validar su asistencia facial.
+          </p>
+          <div class="qr-link-preview">
+            <span class="qr-url-text">{{ getQrFullUrl() }}</span>
+            <button type="button" class="btn-copy-url" (click)="copyQrUrl()" title="Copiar enlace">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+              </svg>
+              Copiar
+            </button>
+          </div>
+        </div>
+
+        <div class="qr-modal-actions">
+          <button type="button" class="btn-download-qr" (click)="downloadQrImage()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span>Descargar QR</span>
+          </button>
+          <button type="button" class="btn-cancel" (click)="closeQrModal()">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

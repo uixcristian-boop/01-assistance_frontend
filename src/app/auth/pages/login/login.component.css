@@ -1,0 +1,401 @@
+/* Contenedor principal con fondo claro estilo Google */
+.auth-viewport {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f0f4f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+/* Tarjeta central limpia con elevacion suave */
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background-color: #ffffff;
+  border-radius: 24px;
+  padding: 2.5rem 2.25rem;
+  box-shadow: 0 1px 3px 0 rgba(60, 64, 67, 0.12), 0 4px 8px 3px rgba(60, 64, 67, 0.08);
+  box-sizing: border-box;
+}
+
+/* Marca de desarrollador */
+.developer-brand {
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  margin-bottom: 1.25rem;
+  user-select: none;
+}
+
+.brand-uix {
+  color: #1f2937;
+}
+
+.brand-cristian {
+  color: #0b57d0;
+}
+
+/* Encabezado del modulo */
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.system-title {
+  color: #1f1f1f;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 0.3rem 0;
+}
+
+.system-subtitle {
+  color: #444746;
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+/* Pestañas estilo selector de Google */
+.auth-tabs {
+  display: flex;
+  background-color: #e9eef6;
+  border-radius: 20px;
+  padding: 4px;
+  margin-bottom: 1.75rem;
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #444746;
+  padding: 0.6rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  background-color: #0b57d0;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(11, 87, 208, 0.25);
+}
+
+.tab-btn:hover:not(.active) {
+  color: #1f1f1f;
+}
+
+/* Formulario */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+/* Contenedor de input con Floating Label estilo Google Outlined */
+.google-input-box {
+  position: relative;
+  width: 100%;
+}
+
+.google-input {
+  width: 100%;
+  height: 54px;
+  padding: 0 14px;
+  font-size: 15px;
+  color: #1f1f1f;
+  background-color: #ffffff !important;
+  border: 1px solid #747775;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.15s ease-in-out;
+  box-sizing: border-box;
+}
+
+/* Evita el fondo azul del autocompletado del navegador */
+.google-input:-webkit-autofill,
+.google-input:-webkit-autofill:hover,
+.google-input:-webkit-autofill:focus,
+.google-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #1f1f1f !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.google-input.has-icon {
+  padding-right: 48px;
+}
+
+.google-input:focus {
+  border: 2px solid #0b57d0;
+  padding-left: 13px;
+}
+
+.google-input.has-icon:focus {
+  padding-right: 47px;
+}
+
+/* Etiqueta flotante con corte de borde */
+.google-label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #ffffff;
+  padding: 0 4px;
+  color: #444746;
+  font-size: 15px;
+  pointer-events: none;
+  transition: top 0.15s ease, font-size 0.15s ease, color 0.15s ease;
+  z-index: 2;
+}
+
+/* Estado flotante sin foco (cuando ya contiene texto) */
+.google-input:not(:placeholder-shown) ~ .google-label,
+.google-label.floating {
+  top: 0;
+  font-size: 12px;
+  color: #444746;
+  font-weight: 500;
+  background-color: #ffffff;
+}
+
+/* Estado flotante con foco activo */
+.google-input:focus ~ .google-label {
+  top: 0;
+  font-size: 12px;
+  color: #0b57d0;
+  font-weight: 600;
+  background-color: #ffffff;
+}
+
+/* Estado de error para inputs y labels estilo Google */
+.google-input.input-invalid {
+  border-color: #d93025;
+}
+
+.google-input.input-invalid:focus {
+  border: 2px solid #d93025;
+  padding-left: 13px;
+}
+
+.google-input.input-invalid ~ .google-label,
+.google-input.input-invalid:focus ~ .google-label {
+  color: #d93025;
+}
+
+.field-error {
+  color: #d93025;
+  font-size: 12px;
+  padding-left: 4px;
+}
+
+/* Boton para alternar visibilidad con icono de ojito */
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #5e5e5e;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+  z-index: 3;
+}
+
+.password-toggle-btn:hover {
+  background-color: #f0f4f9;
+  color: #1f1f1f;
+}
+
+/* Boton principal estilo Google azul */
+.btn-primary {
+  width: 100%;
+  height: 48px;
+  background-color: #0b57d0;
+  color: #ffffff;
+  border: none;
+  border-radius: 24px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #0842a0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Caja de informacion de credenciales con borde azul */
+.credentials-info-box {
+  background-color: #ffffff;
+  border: 1.5px solid #0b57d0;
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 6px rgba(11, 87, 208, 0.08);
+}
+
+.info-text {
+  color: #0b57d0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Notificaciones de error y exito estilo Google Material */
+.google-error-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #d93025;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  margin-bottom: 1.25rem;
+  padding: 4px 2px;
+  animation: fadeInNotice 0.2s ease-out;
+}
+
+.google-error-icon {
+  flex-shrink: 0;
+  color: #d93025;
+}
+
+.google-success-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #137333;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  margin-bottom: 1.25rem;
+  padding: 4px 2px;
+  animation: fadeInNotice 0.2s ease-out;
+}
+
+.google-success-icon {
+  flex-shrink: 0;
+  color: #137333;
+}
+
+@keyframes fadeInNotice {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Adaptabilidad responsive optimizada para telefonos moviles */
+@media (max-width: 480px) {
+  .auth-viewport {
+    padding: 0.75rem;
+  }
+
+  .auth-card {
+    max-width: 375px;
+    padding: 1.5rem 1.25rem;
+    border-radius: 20px;
+  }
+
+  .developer-brand {
+    font-size: 1.15rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .auth-header {
+    margin-bottom: 1rem;
+  }
+
+  .system-title {
+    font-size: 1.18rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .system-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .auth-tabs {
+    margin-bottom: 1.15rem;
+    padding: 3px;
+    border-radius: 16px;
+  }
+
+  .tab-btn {
+    font-size: 0.78rem;
+    padding: 0.45rem 0.35rem;
+    border-radius: 12px;
+  }
+
+  .auth-form {
+    gap: 0.95rem;
+  }
+
+  .google-input {
+    height: 48px;
+    font-size: 14px;
+    border-radius: 8px;
+  }
+
+  .google-label {
+    font-size: 14px;
+  }
+
+  .google-input:focus ~ .google-label,
+  .google-input:not(:placeholder-shown) ~ .google-label,
+  .google-label.floating {
+    top: 0;
+    font-size: 11px;
+    background-color: #ffffff;
+  }
+
+  .btn-primary {
+    height: 44px;
+    font-size: 0.88rem;
+    margin-top: 0.25rem;
+    border-radius: 22px;
+  }
+
+  .credentials-info-box {
+    padding: 0.7rem 0.85rem;
+    margin-top: 0.25rem;
+    border-radius: 10px;
+  }
+
+  .info-text {
+    font-size: 0.73rem;
+    line-height: 1.35;
+  }
+}

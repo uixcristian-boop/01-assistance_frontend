@@ -1,0 +1,338 @@
+/* Contenedor mobile-first para marcaje del alumno */
+.checkin-mobile-container {
+  min-height: 100vh;
+  background-color: #f8fafd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Encabezado */
+.checkin-top-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 440px;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 1rem;
+  background-color: #e8f0fe;
+  color: #0b57d0;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-sizing: border-box;
+}
+
+.checkin-course-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1f1f1f;
+  margin: 0.25rem 0 0 0;
+  line-height: 1.3;
+}
+
+.checkin-course-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: #5f6368;
+}
+
+/* Estado de carga */
+.loading-state-card {
+  margin-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: #5f6368;
+  font-size: 0.9rem;
+}
+
+.spinner-circle {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e0e3e7;
+  border-top-color: #0b57d0;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error */
+.error-state-card {
+  background-color: #ffffff;
+  border: 1px solid #fce8e6;
+  border-radius: 16px;
+  padding: 2.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.85rem;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.error-icon-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #fce8e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin: 0;
+}
+
+.error-desc {
+  font-size: 0.88rem;
+  color: #5f6368;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.btn-retry-scan {
+  margin-top: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background-color: #0b57d0;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Tarjeta de resultado exitoso */
+.success-checkin-card {
+  background-color: #ffffff;
+  border: 1.5px solid #ceead6;
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 6px 20px rgba(19, 115, 51, 0.08);
+}
+
+.success-check-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: #137333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 4px 10px rgba(19, 115, 51, 0.3);
+}
+
+.circle-tardanza {
+  background-color: #e37400;
+  box-shadow: 0 4px 10px rgba(227, 116, 0, 0.3);
+}
+
+.result-status-badge {
+  display: inline-flex;
+  padding: 0.3rem 0.85rem;
+  background-color: #e6f4ea;
+  color: #137333;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.5rem;
+}
+
+.badge-tardanza {
+  background-color: #fef7e0;
+  color: #b06000;
+}
+
+.result-student-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1f1f1f;
+  margin: 0;
+}
+
+.result-student-code {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #5f6368;
+  margin-top: 0.15rem;
+}
+
+.result-details-box {
+  width: 100%;
+  background-color: #f8fafd;
+  border: 1px solid #e0e3e7;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  margin: 1.25rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.detail-lbl {
+  color: #5f6368;
+}
+
+.detail-val {
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.text-confidence {
+  color: #137333;
+}
+
+.success-hint {
+  font-size: 0.82rem;
+  color: #5f6368;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Escaner de Camara */
+.camera-scanner-wrapper {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.scanner-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background-color: #000000;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-stream {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.hidden-canvas {
+  display: none;
+}
+
+.scanner-face-oval {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.oval-border {
+  width: 200px;
+  height: 260px;
+  border: 2.5px solid #0b57d0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+  animation: scanBreath 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes scanBreath {
+  from { transform: scale(0.97); border-color: #0b57d0; }
+  to { transform: scale(1.02); border-color: #4285f4; }
+}
+
+.validating-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.scanner-status-card {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e0e3e7;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.status-pulse-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #0b57d0;
+  animation: blink 1s infinite;
+  flex-shrink: 0;
+}
+
+.scanner-status-text {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1f1f1f;
+}
+
+.scanner-tip {
+  font-size: 0.78rem;
+  color: #5f6368;
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+}

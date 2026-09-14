@@ -1,0 +1,1195 @@
+/* Contenedor principal del modulo de alumnos */
+.students-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
+}
+
+/* Encabezado superior */
+.page-top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.page-main-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #1f1f1f;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* Selector de curso */
+.course-selector-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e2ec;
+  padding: 0.85rem 1.15rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.selector-field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.selector-field-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #5f6368;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Selector animado personalizado con flecha que gira 180 grados */
+.custom-select-box {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-trigger {
+  width: 100%;
+  height: 38px;
+  padding: 0 10px;
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: #1f1f1f;
+  outline: none;
+  transition: border 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.custom-select-trigger:focus,
+.custom-select-trigger.open {
+  border-color: #0b57d0;
+  box-shadow: 0 0 0 3px rgba(11, 87, 208, 0.12);
+}
+
+.selected-course-label {
+  font-size: 0.82rem;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 4px;
+  color: #1f1f1f;
+}
+
+.selected-course-label.placeholder-text {
+  color: #747775;
+}
+
+.trigger-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.btn-clear-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #747775;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.btn-clear-trigger:hover {
+  background-color: #f1f3f4;
+  color: #1f1f1f;
+}
+
+.select-chevron {
+  color: #747775;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s;
+  flex-shrink: 0;
+}
+
+.select-chevron.rotated {
+  transform: rotate(180deg);
+  color: #0b57d0;
+}
+
+.custom-select-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e0e2ec;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 50;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px;
+  box-sizing: border-box;
+  animation: fadeInMenu 0.15s ease-out;
+}
+
+@keyframes fadeInMenu {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.custom-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: #1f1f1f;
+  cursor: pointer;
+  transition: background-color 0.12s;
+}
+
+.custom-select-option:hover {
+  background-color: #f1f3f4;
+}
+
+.custom-select-option.selected {
+  background-color: #e8f0fe;
+  color: #0b57d0;
+  font-weight: 500;
+}
+
+/* Tarjeta de estado cuando no hay curso seleccionado */
+.empty-selection-card {
+  background-color: #ffffff;
+  border: 1px dashed #c4c7c5;
+  border-radius: 16px;
+  padding: 2.75rem 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Botones del encabezado */
+.header-right-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-action-qr {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  background-color: #0b57d0;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(11, 87, 208, 0.2);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-action-qr:hover {
+  background-color: #0842a0;
+  box-shadow: 0 2px 6px rgba(11, 87, 208, 0.3);
+}
+
+.btn-add-student {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.1rem;
+  background-color: #ffffff;
+  color: #0b57d0;
+  border: 1.5px solid #d2e3fc;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-add-student:hover {
+  background-color: #f4f8ff;
+  border-color: #0b57d0;
+}
+
+/* Panel de Metricas KPI Limpio y Ordenado */
+.kpi-stats-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e0e2ec;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.kpi-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.kpi-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #5f6368;
+  white-space: nowrap;
+}
+
+.kpi-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f1f1f;
+  line-height: 1.1;
+}
+
+.kpi-divider {
+  width: 1px;
+  height: 28px;
+  background-color: #e0e2ec;
+  flex-shrink: 0;
+}
+
+/* Estado de carga */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: #5f6368;
+  font-size: 0.95rem;
+}
+
+/* Estado vacio minimalista */
+.empty-students-card {
+  background-color: #ffffff;
+  border: 1px dashed #d2e3fc;
+  border-radius: 14px;
+  padding: 2.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.45rem;
+}
+
+.empty-icon-circle {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background-color: #edf2fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.empty-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin: 0;
+}
+
+.empty-subtitle {
+  font-size: 0.82rem;
+  color: #5f6368;
+  max-width: 380px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Adaptabilidad movil */
+@media (max-width: 640px) {
+  .header-right-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .btn-action-qr,
+  .btn-add-student {
+    justify-content: center;
+    padding: 0.55rem 0.4rem;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .metrics-bar {
+    gap: 0.4rem;
+  }
+
+  .metric-card {
+    padding: 0.7rem 0.25rem;
+  }
+
+  .metric-num {
+    font-size: 1.25rem;
+  }
+
+  .metric-label {
+    font-size: 0.68rem;
+  }
+}
+
+/* Tabla Desktop y Tarjetas Moviles */
+.desktop-table-view {
+  display: block;
+}
+
+.mobile-cards-view {
+  display: none;
+}
+
+.table-container {
+  background-color: #ffffff;
+  border: 1px solid #e0e3e7;
+  border-radius: 14px;
+  overflow-x: auto;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.students-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.students-table th {
+  padding: 0.85rem 1.25rem;
+  font-weight: 600;
+  color: #444746;
+  background-color: #f8fafd;
+  border-bottom: 1px solid #e0e3e7;
+  white-space: nowrap;
+}
+
+.students-table td {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #f1f3f4;
+  color: #1f1f1f;
+  vertical-align: middle;
+}
+
+.students-table tr:last-child td {
+  border-bottom: none;
+}
+
+.td-code {
+  font-family: monospace;
+  font-weight: 600;
+  color: #1f1f1f;
+  white-space: nowrap;
+}
+
+.student-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.student-avatar-thumb {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #d2e3fc;
+  flex-shrink: 0;
+}
+
+.student-avatar-placeholder {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 50%;
+  background-color: #e8f0fe;
+  color: #0b57d0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.student-fullname {
+  font-weight: 500;
+  color: #1f1f1f;
+  white-space: nowrap;
+}
+
+.td-email {
+  color: #5f6368;
+}
+
+/* Tarjeta de Alumno para vista movil */
+.student-card-mobile {
+  background-color: #ffffff;
+  border: 1px solid #e0e3e7;
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.st-card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.st-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.st-card-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.st-card-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.st-code-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: monospace;
+  background-color: #f1f3f4;
+  color: #444746;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid #dadce0;
+}
+
+.st-email-text {
+  font-size: 0.75rem;
+  color: #5f6368;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #f1f3f4;
+  padding-top: 0.65rem;
+  gap: 0.5rem;
+}
+
+.st-status-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.st-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+@media (max-width: 768px) {
+  .desktop-table-view {
+    display: none !important;
+  }
+
+  .mobile-cards-view {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+/* Badges de estado */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 34px;
+  padding: 0 0.65rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.badge-enrolled {
+  background-color: #e6f4ea;
+  color: #137333;
+  border: 1px solid #ceead6;
+}
+
+.badge-pending {
+  background-color: #fef7e0;
+  color: #b06000;
+  border: 1px solid #feefc3;
+}
+
+/* Acciones de tabla */
+.td-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn-row-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 34px;
+  padding: 0 0.65rem;
+  border-radius: 8px;
+  border: 1px solid #dadce0;
+  background-color: #ffffff;
+  color: #444746;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.btn-row-action:hover {
+  background-color: #f1f3f4;
+  color: #1f1f1f;
+}
+
+.btn-scan-face {
+  background-color: #f4f8ff;
+  border: 1px solid #d2e3fc;
+  color: #0b57d0;
+  height: 34px;
+  padding: 0 0.65rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.btn-scan-face:hover {
+  background-color: #e8f0fe;
+  border-color: #0b57d0;
+  color: #0842a0;
+}
+
+.btn-edit-student {
+  background-color: #0b57d0;
+  border: 1px solid #0b57d0;
+  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.btn-edit-student:hover {
+  background-color: #0842a0;
+  border-color: #0842a0;
+  color: #ffffff;
+}
+
+.btn-delete-student {
+  background-color: #d93025;
+  border: 1px solid #d93025;
+  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.btn-delete-student:hover {
+  background-color: #b3261e;
+  border-color: #b3261e;
+  color: #ffffff;
+}
+
+/* Modales con fondo desenfocado y diseño Google Material 3 */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.modal-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.modal-header {
+  padding: 1.25rem 1.4rem 1rem;
+  border-bottom: 1px solid #f0f4f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1f1f1f;
+  margin: 0;
+}
+
+.btn-close-modal {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #747775;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.btn-close-modal:hover {
+  background-color: #f0f4f9;
+  color: #1f1f1f;
+}
+
+/* Formulario con campos flotantes */
+.modal-form {
+  padding: 1.25rem 1.4rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.google-input-box {
+  position: relative;
+  width: 100%;
+}
+
+.google-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #1f1f1f;
+  background-color: #ffffff !important;
+  border: 1px solid #747775;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.15s ease-in-out;
+  box-sizing: border-box;
+}
+
+.google-input:focus {
+  border: 2px solid #0b57d0;
+  padding: 0 11px;
+}
+
+.google-input.input-invalid {
+  border-color: #ba1a1a !important;
+}
+
+.google-label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #ffffff;
+  padding: 0 4px;
+  color: #444746;
+  font-size: 14px;
+  pointer-events: none;
+  transition: all 0.15s ease-in-out;
+  border-radius: 4px;
+}
+
+.google-input:focus ~ .google-label,
+.google-input:not(:placeholder-shown) ~ .google-label,
+.google-label.floating {
+  top: 0;
+  font-size: 11px;
+  color: #0b57d0;
+  font-weight: 500;
+}
+
+.google-input.input-invalid ~ .google-label {
+  color: #ba1a1a;
+}
+
+.field-error {
+  color: #ba1a1a;
+  font-size: 11px;
+  margin-top: 2px;
+  padding-left: 4px;
+}
+
+.alert-error-banner {
+  padding: 0.65rem 0.85rem;
+  background-color: #fce8e6;
+  color: #c5221f;
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f3f4;
+}
+
+.btn-cancel {
+  padding: 0.55rem 1.15rem;
+  background: transparent;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #444746;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-cancel:hover {
+  background-color: #f1f3f4;
+}
+
+.btn-save {
+  padding: 0.55rem 1.35rem;
+  background-color: #0b57d0;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-save:hover {
+  background-color: #0842a0;
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Modal de Camara y Enrolamiento Facial */
+.modal-camera-enrollment {
+  max-width: 520px;
+}
+
+.camera-modal-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.student-target-label {
+  font-size: 0.82rem;
+  color: #0b57d0;
+  font-weight: 500;
+}
+
+.camera-body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* Barra de 3 fases de enrolamiento */
+.enrollment-phases-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.phase-step-chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.5rem;
+  background-color: #f1f3f4;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #5f6368;
+  transition: all 0.2s ease;
+}
+
+.phase-step-chip.active {
+  background-color: #e8f0fe;
+  border-color: #0b57d0;
+  color: #0b57d0;
+  font-weight: 600;
+}
+
+.phase-step-chip.done {
+  background-color: #e6f4ea;
+  border-color: #137333;
+  color: #137333;
+}
+
+.step-num {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: currentColor;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background-color: #000000;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-feed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* Efecto espejo */
+}
+
+.mesh-canvas-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform: scaleX(-1); /* Reflejo identico al video */
+}
+
+.hidden-canvas {
+  display: none;
+}
+
+/* Guia ovalada para el rostro */
+.face-guide-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.guide-oval {
+  width: 180px;
+  height: 230px;
+  border: 2px dashed rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.face-guide-overlay.scanning .guide-oval {
+  border-color: #0b57d0;
+  border-style: solid;
+  border-width: 3px;
+  animation: pulseGuide 1s infinite alternate;
+}
+
+.face-guide-overlay.face-detected .guide-oval {
+  border-color: #137333 !important;
+  border-style: solid;
+  border-width: 3px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.25), 0 0 15px rgba(19, 115, 51, 0.5);
+}
+
+.face-guide-overlay.face-missing .guide-oval {
+  border-color: #e37400 !important;
+  border-style: dashed;
+  border-width: 2.5px;
+}
+
+.face-guide-overlay.success .guide-oval {
+  border-color: #137333;
+  border-style: solid;
+  border-width: 3px;
+}
+
+@keyframes pulseGuide {
+  from { transform: scale(0.98); opacity: 0.8; }
+  to { transform: scale(1.02); opacity: 1; }
+}
+
+.capture-overlay-info {
+  position: absolute;
+  bottom: 12px;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.capture-overlay-info.warning-state {
+  background-color: rgba(176, 96, 0, 0.85);
+}
+
+.pulse-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #137333;
+  animation: blink 0.8s infinite;
+}
+
+.pulse-indicator.pulse-warning {
+  background-color: #fdd663;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.enroll-success-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(19, 115, 51, 0.90);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem 1.5rem;
+  gap: 0.4rem;
+  z-index: 10;
+}
+
+.success-icon-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.2rem;
+}
+
+.success-text {
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.success-subtext {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.76rem;
+  font-weight: 400;
+  text-align: center;
+  margin: 0;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 6px;
+  background-color: #e0e3e7;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #0b57d0;
+  transition: width 0.05s linear;
+}
+
+.camera-instructions {
+  font-size: 0.82rem;
+  color: #5f6368;
+  line-height: 1.4;
+  margin: 0;
+  text-align: center;
+}
+
+.camera-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.btn-start-burst {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.25rem;
+  background-color: #0b57d0;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-start-burst:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Modal de Eliminacion */
+.modal-delete-confirm {
+  max-width: 380px;
+  padding: 1.75rem 1.5rem;
+  align-items: center;
+  text-align: center;
+}
+
+.delete-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: #fce8e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.delete-confirm-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin: 0;
+}
+
+.delete-confirm-desc {
+  font-size: 0.85rem;
+  color: #5f6368;
+  margin: 0.5rem 0 1.25rem 0;
+  line-height: 1.4;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.btn-cancel-del {
+  flex: 1;
+  padding: 0.6rem;
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #444746;
+  cursor: pointer;
+}
+
+.btn-confirm-del {
+  flex: 1;
+  padding: 0.6rem;
+  background-color: #d93025;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #ffffff;
+  cursor: pointer;
+}

@@ -1,0 +1,115 @@
+<div class="checkin-mobile-container">
+  <!-- Encabezado de la aplicacion -->
+  <header class="checkin-top-header">
+    <div class="brand-badge">
+      <span class="brand-text">UCSS Asistencia</span>
+    </div>
+    @if (sessionData(); as data) {
+      <h1 class="checkin-course-name">{{ data.courseName }}</h1>
+      <div class="checkin-course-meta">
+        <span>COD: {{ data.courseCode }}</span>
+        <span>•</span>
+        <span>Sec. {{ data.section }}</span>
+        <span>•</span>
+        <span>{{ data.startTime }} - {{ data.endTime }}</span>
+      </div>
+    }
+  </header>
+
+  <!-- Estado de carga inicial -->
+  @if (isLoadingSession()) {
+    <div class="loading-state-card">
+      <div class="spinner-circle"></div>
+      <span>Cargando datos de la clase...</span>
+    </div>
+  }
+
+  <!-- Mensaje de error o sesion expirada -->
+  @if (!isLoadingSession() && sessionError() && !checkInResult()) {
+    <div class="error-state-card">
+      <div class="error-icon-circle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d93025" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <h3 class="error-title">No se pudo registrar asistencia</h3>
+      <p class="error-desc">{{ sessionError() }}</p>
+      <button type="button" class="btn-retry-scan" (click)="retryScan()">
+        Intentar nuevamente
+      </button>
+    </div>
+  }
+
+  <!-- Confirmacion de Marcaje Exitoso -->
+  @if (checkInResult(); as result) {
+    <div class="success-checkin-card">
+      <div class="success-check-circle" [class.circle-tardanza]="result.status === 'TARDANZA'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+
+      <div class="result-status-badge" [class.badge-tardanza]="result.status === 'TARDANZA'">
+        {{ result.status === 'PRESENTE' ? 'ASISTENCIA REGISTRADA' : 'TARDANZA REGISTRADA' }}
+      </div>
+
+      <h2 class="result-student-name">{{ result.studentName }}</h2>
+      <span class="result-student-code">Código: {{ result.studentCode }}</span>
+
+      <div class="result-details-box">
+        <div class="detail-row">
+          <span class="detail-lbl">Hora de Marcaje:</span>
+          <span class="detail-val">{{ result.checkInTime | date:'shortTime' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-lbl">Fecha:</span>
+          <span class="detail-val">{{ sessionData()?.sessionDate }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-lbl">Curso:</span>
+          <span class="detail-val">{{ sessionData()?.courseName }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-lbl">Verificación Biométrica:</span>
+          <span class="detail-val text-confidence">98.5% Coincidencia</span>
+        </div>
+      </div>
+
+      <p class="success-hint">
+        Tu marcaje ha sido sincronizado en tiempo real con la lista del docente.
+      </p>
+    </div>
+  }
+
+  <!-- Visor de Camara para Escaneo Facial -->
+  @if (!isLoadingSession() && !checkInResult() && !sessionError()) {
+    <div class="camera-scanner-wrapper">
+      <div class="scanner-viewport">
+        <video #videoPlayer autoplay playsinline muted class="camera-stream"></video>
+        <canvas #scanCanvas class="hidden-canvas"></canvas>
+
+        <div class="scanner-face-oval" [class.submitting]="isSubmittingCheckin()">
+          <div class="oval-border"></div>
+        </div>
+
+        @if (isSubmittingCheckin()) {
+          <div class="validating-overlay">
+            <div class="spinner-circle"></div>
+            <span>Validando identidad...</span>
+          </div>
+        }
+      </div>
+
+      <div class="scanner-status-card">
+        <div class="status-pulse-dot"></div>
+        <span class="scanner-status-text">{{ scanStatusText() }}</span>
+      </div>
+
+      <p class="scanner-tip">
+        Mantenga su teléfono a la altura de los ojos con buena iluminación para validar su identidad.
+      </p>
+    </div>
+  }
+</div>

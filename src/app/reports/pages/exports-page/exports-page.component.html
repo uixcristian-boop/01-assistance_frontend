@@ -1,0 +1,285 @@
+<div class="exports-page-container">
+  <!-- Encabezado limpio -->
+  <div class="page-header">
+    <h1 class="page-title">Exportar Documentos</h1>
+  </div>
+
+  <!-- Selector de Curso animado con opción de limpiar -->
+  <div class="course-selector-card">
+    <div class="selector-field-row">
+      <label class="selector-field-label">Curso</label>
+      <div class="custom-select-box">
+        <button
+          type="button"
+          class="custom-select-trigger"
+          [class.open]="isCourseDropdownOpen()"
+          (click)="toggleCourseDropdown($event)">
+          <span class="selected-course-label" [class.placeholder-text]="!currentCourse()">
+            {{ currentCourse() ? (currentCourse()!.name + ' — ' + currentCourse()!.section) : 'Seleccionar curso' }}
+          </span>
+
+          <div class="trigger-actions">
+            @if (currentCourse()) {
+              <span
+                class="btn-clear-trigger"
+                (click)="clearSelection($event)"
+                title="Limpiar selección">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </span>
+            }
+            <svg class="select-chevron" [class.rotated]="isCourseDropdownOpen()" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </div>
+        </button>
+
+        @if (isCourseDropdownOpen()) {
+          <div class="custom-select-dropdown" (click)="$event.stopPropagation()">
+            @for (course of courseService.courses(); track course.id) {
+              <div
+                class="custom-select-option"
+                [class.selected]="course.id === selectedCourseId()"
+                (click)="onSelectCourse(course)">
+                <span>{{ course.name }} — {{ course.section }}</span>
+                @if (course.id === selectedCourseId()) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0b57d0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (currentCourse(); as course) {
+    <!-- Panel de Metricas KPI Limpio y Ordenado -->
+    <div class="kpi-stats-card">
+      <div class="kpi-item">
+        <span class="kpi-label">Matriculados</span>
+        <span class="kpi-value">{{ totalStudentsCount() }}</span>
+      </div>
+
+      <div class="kpi-divider"></div>
+
+      <div class="kpi-item">
+        <span class="kpi-label">Enrolados</span>
+        <span class="kpi-value">{{ enrolledStudentsCount() }}</span>
+      </div>
+
+      <div class="kpi-divider"></div>
+
+      <div class="kpi-item">
+        <span class="kpi-label">Pendientes</span>
+        <span class="kpi-value">{{ pendingStudentsCount() }}</span>
+      </div>
+
+      <div class="kpi-divider"></div>
+
+      <div class="kpi-item">
+        <span class="kpi-label">Cobertura</span>
+        <span class="kpi-value">{{ coveragePercentage() }}%</span>
+      </div>
+    </div>
+
+    <!-- Barra de Herramientas: Acciones de Exportacion y Filtros -->
+    <div class="tools-card">
+      <!-- Botones de Exportacion identicos en altura y estructura -->
+      <div class="export-actions-row">
+        <button
+          type="button"
+          class="btn-export btn-export-excel"
+          (click)="exportExcel()"
+          [disabled]="isExportingExcel() || filteredStudents().length === 0"
+          title="Descargar listado en Excel (.xlsx)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="8" y1="13" x2="16" y2="13"/>
+            <line x1="8" y1="17" x2="16" y2="17"/>
+          </svg>
+          <span class="btn-text">{{ isExportingExcel() ? 'Generando...' : 'Exportar Excel' }}</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn-export btn-export-pdf"
+          (click)="exportPdf()"
+          [disabled]="isExportingPdf() || filteredStudents().length === 0"
+          title="Descargar listado en PDF (.pdf)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <path d="M12 18v-6"/>
+            <path d="m9 15 3 3 3-3"/>
+          </svg>
+          <span class="btn-text">{{ isExportingPdf() ? 'Generando...' : 'Exportar PDF' }}</span>
+        </button>
+      </div>
+
+      <div class="filters-search-row">
+        <!-- Buscador rapido -->
+        <div class="search-box">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Buscar por nombre, apellido o código..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)">
+        </div>
+
+        <!-- Filtros de estado -->
+        <div class="filter-pills">
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="statusFilter() === 'ALL'"
+            (click)="setFilter('ALL')">
+            Todos ({{ totalStudentsCount() }})
+          </button>
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="statusFilter() === 'ENROLLED'"
+            (click)="setFilter('ENROLLED')">
+            Enrolados ({{ enrolledStudentsCount() }})
+          </button>
+          <button
+            type="button"
+            class="pill-btn"
+            [class.active]="statusFilter() === 'PENDING'"
+            (click)="setFilter('PENDING')">
+            Pendientes ({{ pendingStudentsCount() }})
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista / Tabla de Registros -->
+    <div class="records-card">
+      <div class="records-header">
+        <h3 class="records-title">Alumnos del Curso ({{ filteredStudents().length }})</h3>
+      </div>
+
+      @if (studentService.isLoading()) {
+        <div class="loading-state">
+          <div class="spinner-circle"></div>
+          <span>Cargando alumnos...</span>
+        </div>
+      } @else if (filteredStudents().length > 0) {
+        <!-- Vista Tabla para Escritorio -->
+        <div class="table-container desktop-table-view">
+          <table class="exports-table">
+            <thead>
+              <tr>
+                <th class="th-num">N°</th>
+                <th>Código</th>
+                <th>Apellidos</th>
+                <th>Nombres</th>
+                <th>Correo Institucional</th>
+                <th>Estado Biométrico</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (student of filteredStudents(); track student.id; let i = $index) {
+                <tr>
+                  <td class="td-num">{{ i + 1 }}</td>
+                  <td class="td-code">{{ student.code }}</td>
+                  <td class="td-lastname">{{ student.lastName }}</td>
+                  <td class="td-firstname">{{ student.firstName }}</td>
+                  <td class="td-email">{{ student.email || '-' }}</td>
+                  <td class="td-status">
+                    @if (student.hasFaceDescriptor) {
+                      <span class="badge-status badge-enrolled">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        Enrolado (3D)
+                      </span>
+                    } @else {
+                      <span class="badge-status badge-pending">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <line x1="12" y1="8" x2="12" y2="12"/>
+                          <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        Pendiente
+                      </span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Vista Tarjetas para Pantallas Moviles -->
+        <div class="mobile-cards-view">
+          @for (student of filteredStudents(); track student.id) {
+            <div class="student-card-mobile">
+              <div class="st-card-top">
+                <div class="st-card-info">
+                  <h4 class="st-card-name">{{ student.firstName }} {{ student.lastName }}</h4>
+                  <div class="st-card-tags">
+                    <span class="st-code-pill">COD: {{ student.code }}</span>
+                    @if (student.email) {
+                      <span class="st-email-text">{{ student.email }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <div class="st-card-bottom">
+                <div class="st-status-wrapper">
+                  @if (student.hasFaceDescriptor) {
+                    <span class="badge-status badge-enrolled">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      <span>Enrolado</span>
+                    </span>
+                  } @else {
+                    <span class="badge-status badge-pending">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                      </svg>
+                      <span>Pendiente</span>
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-state-card">
+          <h4 class="empty-title">Sin alumnos registrados</h4>
+          <p class="empty-desc">No se encontraron estudiantes para los filtros seleccionados.</p>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state-card">
+      <div class="empty-icon-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#747775" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+          <path d="M6 6h10"/>
+          <path d="M6 10h10"/>
+        </svg>
+      </div>
+      <h4 class="empty-title">Selecciona un curso</h4>
+      <p class="empty-desc">Elige una asignatura arriba para visualizar la lista de alumnos y generar reportes.</p>
+    </div>
+  }
+</div>
