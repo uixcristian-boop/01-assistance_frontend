@@ -537,6 +537,57 @@
   color: #5f6368;
 }
 
+/* Parametros editables de hora y tolerancia */
+.editable-time-box {
+  width: 100%;
+}
+
+.time-picker-input {
+  height: 44px;
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #c4c7c5;
+  border-radius: 8px;
+  padding: 0 0.85rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f1f1f;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+
+.time-picker-input:focus {
+  border-color: #0b57d0;
+  box-shadow: 0 0 0 2px rgba(11, 87, 208, 0.2);
+}
+
+.quick-time-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.btn-quick-time {
+  background: none;
+  border: 1px solid #0b57d0;
+  color: #0b57d0;
+  border-radius: 16px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.btn-quick-time:hover {
+  background-color: #e8f0fe;
+}
+
 /* Parametros bloqueados de solo lectura */
 .readonly-param-box {
   height: 42px;

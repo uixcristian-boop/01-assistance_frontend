@@ -37,6 +37,12 @@ export class LoginComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // Si ya existe sesion activa en almacenamiento local, redirige de inmediato al panel
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/dashboard/courses']);
+      return;
+    }
+
     // Limpia el mensaje de error tan pronto como el usuario modifica algun campo
     this.loginForm.valueChanges.subscribe(() => {
       if (this.errorMessage()) {

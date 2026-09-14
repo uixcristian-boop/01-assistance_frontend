@@ -165,10 +165,10 @@ export class StudentCheckinComponent implements OnInit, OnDestroy {
         }
       }
 
-      // Umbral estricto de coincidencia de alta precision (>= 90%)
-      const hasConfidenceMargin = students.length <= 1 || (highestSimilarity - secondSimilarity >= 4);
+      // Umbral calibrado de coincidencia facial (>= 78%)
+      const hasConfidenceMargin = students.length <= 1 || (highestSimilarity - secondSimilarity >= 3);
 
-      if (highestSimilarity >= 90 && bestStudent && hasConfidenceMargin) {
+      if (highestSimilarity >= 78 && bestStudent && hasConfidenceMargin) {
         if (candidateStudent?.id === bestStudent.id) {
           consecutiveMatches++;
         } else {
@@ -177,10 +177,10 @@ export class StudentCheckinComponent implements OnInit, OnDestroy {
         }
         candidateConfidence = highestSimilarity;
 
-        this.scanStatusText.set(`Identificando: ${bestStudent.lastName} ${bestStudent.firstName} (${highestSimilarity}%) [${consecutiveMatches}/4]`);
+        this.scanStatusText.set(`¡Rostro reconocido! ${bestStudent.lastName} ${bestStudent.firstName} (${highestSimilarity}%) [${consecutiveMatches}/2]`);
 
-        // Al confirmar 4 lecturas consecutivas seguras (aprox 1 segundo estable), registra la asistencia
-        if (consecutiveMatches >= 4) {
+        // Al confirmar 2 lecturas consecutivas seguras (~400ms estable), registra la asistencia
+        if (consecutiveMatches >= 2) {
           // Captura fotograma final
           const size = Math.min(video.videoWidth, video.videoHeight);
           const startX = (video.videoWidth - size) / 2;
@@ -191,7 +191,11 @@ export class StudentCheckinComponent implements OnInit, OnDestroy {
       } else {
         consecutiveMatches = 0;
         candidateStudent = null;
-        this.scanStatusText.set(`Rostro detectado (468 puntos 3D). Mantén la vista fija...`);
+        if (bestStudent && highestSimilarity > 45) {
+          this.scanStatusText.set(`Analizando: ${bestStudent.lastName} ${bestStudent.firstName} (${highestSimilarity}% / meta: 78%)`);
+        } else {
+          this.scanStatusText.set('Rostro enfocado. Mantén la mirada fija hacia la cámara...');
+        }
       }
     }, 200);
   }

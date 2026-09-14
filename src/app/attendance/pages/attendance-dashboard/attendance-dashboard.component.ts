@@ -141,39 +141,42 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
     this.stopPolling();
   }
 
-  // Carga los datos del curso actual
+  // Ajusta el formulario a la hora actual (+2 horas de duracion de clase)
+  setCurrentTimeSlot(): void {
+    const now = new Date();
+    const startH = now.getHours().toString().padStart(2, '0');
+    const startM = now.getMinutes().toString().padStart(2, '0');
+    const endDate = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+    const endH = endDate.getHours().toString().padStart(2, '0');
+    const endM = endDate.getMinutes().toString().padStart(2, '0');
+
+    this.sessionForm.patchValue({
+      startTime: `${startH}:${startM}`,
+      endTime: `${endH}:${endM}`,
+      toleranceMinutes: 15,
+      lateThresholdMinutes: 30
+    });
+  }
+
+  // Carga los datos del curso actual consultando el backend
   private loadCourse(id: number): void {
-    const cached = this.courseService.courses().find(c => c.id === id);
-    if (cached) {
-      this.currentCourse.set(cached);
-      this.extractTimesFromSchedule(cached.schedule);
-    } else {
-      this.courseService.loadCourses().subscribe(courses => {
-        const found = courses.find(c => c.id === id);
-        if (found) {
-          this.currentCourse.set(found);
-          this.extractTimesFromSchedule(found.schedule);
-        }
-      });
-    }
+    this.courseService.loadCourses().subscribe(courses => {
+      const found = courses.find(c => c.id === id);
+      if (found) {
+        this.currentCourse.set(found);
+        this.extractTimesFromSchedule(found.schedule);
+      }
+    });
   }
 
   // Extrae y pre-completa las horas segun el horario registrado del curso
   private extractTimesFromSchedule(scheduleStr?: string | null): void {
     if (!scheduleStr) {
-      const now = new Date();
-      const currentH = now.getHours().toString().padStart(2, '0');
-      const endH = (now.getHours() + 2).toString().padStart(2, '0');
-      this.sessionForm.patchValue({
-        startTime: `${currentH}:00`,
-        endTime: `${endH}:00`,
-        toleranceMinutes: 15,
-        lateThresholdMinutes: 30
-      });
+      this.setCurrentTimeSlot();
       return;
     }
 
-    // Parsea horarios (ej. "07:10 PM - 10:20 PM" o "Lunes 07:10 PM - 10:20 PM")
+    // Parsea horarios (ej. "05:00 PM - 07:00 PM" o "Lunes 05:00 PM - 07:00 PM")
     const match = scheduleStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?\s*-\s*(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
     if (match) {
       const start24 = this.to24Hour(parseInt(match[1], 10), match[3]);
@@ -184,6 +187,8 @@ export class AttendanceDashboardComponent implements OnInit, OnDestroy {
         toleranceMinutes: 15,
         lateThresholdMinutes: 30
       });
+    } else {
+      this.setCurrentTimeSlot();
     }
   }
 

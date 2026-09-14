@@ -21,8 +21,8 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(modifiedReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      // Redirige al login si la sesion no es valida y no es una peticion publica
-      if ((error.status === 401 || error.status === 403) && !req.url.includes('/api/auth/')) {
+      // Redirige al login solo si una peticion autenticada es rechazada por token invalido o expirado (401)
+      if (error.status === 401 && token && !req.url.includes('/api/auth/')) {
         authService.logout();
         router.navigate(['/login']);
       }
