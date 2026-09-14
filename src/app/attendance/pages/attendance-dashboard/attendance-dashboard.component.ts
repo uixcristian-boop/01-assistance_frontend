@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AttendanceService } from '../../services/attendance.service';
 import { CourseService } from '../../../courses/services/course.service';
 import { Course } from '../../../courses/models/course.models';
+import { AttendanceSession } from '../../models/attendance.models';
 import { NotificationService } from '../../../core/services/notification.service';
 import { QrGenerator } from '../../../core/utils/qr-generator';
 import { environment } from '../../../../environments/environment';
