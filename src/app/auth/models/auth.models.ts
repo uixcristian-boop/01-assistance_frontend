@@ -18,6 +18,7 @@ export interface AuthResponse {
   role?: string;
   profilePicture?: string;
   message?: string;
+  temporaryPassword?: string;
 }
 
 export interface UserSession {

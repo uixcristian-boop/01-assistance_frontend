@@ -111,7 +111,11 @@ export class LoginComponent implements OnInit {
     this.authService.registerProfessor(this.registerForm.value).subscribe({
       next: (res) => {
         this.isLoading.set(false);
-        this.successMessage.set(res.message || 'Profesor registrado. La contraseña fue enviada al correo.');
+        let msg = res.message || 'Profesor registrado. La contraseña fue enviada al correo.';
+        if (res.temporaryPassword) {
+          msg += ` | Clave temporal: ${res.temporaryPassword}`;
+        }
+        this.successMessage.set(msg);
         this.registerForm.reset();
       },
       error: (err) => {
