@@ -79,6 +79,8 @@ export class StudentCheckinComponent implements OnInit, OnDestroy {
     });
   }
 
+  private isAnalyzingFrame = false;
+
   // Inicia la camara frontal del dispositivo movil o laptop
   async startCamera(): Promise<void> {
     try {
@@ -91,16 +93,31 @@ export class StudentCheckinComponent implements OnInit, OnDestroy {
         audio: false
       });
 
-      if (this.videoPlayer?.nativeElement) {
-        this.videoPlayer.nativeElement.srcObject = this.mediaStream;
-        await this.videoPlayer.nativeElement.play();
+      // Espera a que el elemento video esté montado en el DOM
+      const videoEl = await this.waitForVideoElement();
+      if (videoEl) {
+        videoEl.srcObject = this.mediaStream;
+        await videoEl.play();
         this.isCameraActive.set(true);
         this.startFaceRecognitionLoop();
+      } else {
+        this.scanStatusText.set('No se pudo inicializar el visor de cámara.');
       }
     } catch (err) {
       console.error('Error de acceso a camara:', err);
       this.scanStatusText.set('No se pudo acceder a la cámara. Conceda los permisos requeridos.');
     }
+  }
+
+  // Espera activa a que ViewChild('#videoPlayer') exista en el DOM
+  private async waitForVideoElement(): Promise<HTMLVideoElement | null> {
+    for (let i = 0; i < 30; i++) {
+      if (this.videoPlayer?.nativeElement) {
+        return this.videoPlayer.nativeElement;
+      }
+      await new Promise(r => setTimeout(r, 100));
+    }
+    return null;
   }
 
   // Detiene la camara y bucle de reconocimiento
@@ -129,75 +146,93 @@ export class StudentCheckinComponent implements OnInit, OnDestroy {
     let candidateConfidence = 0;
 
     this.scanIntervalId = setInterval(async () => {
-      if (this.checkInResult() || this.isSubmittingCheckin()) {
+      if (this.isAnalyzingFrame || this.checkInResult() || this.isSubmittingCheckin()) {
         return;
       }
 
       const video = this.videoPlayer?.nativeElement;
       if (!video || video.videoWidth === 0 || !ctx) return;
 
-      const analysis = await FaceBiometrics.processFrame(video);
-      if (!analysis || !analysis.hasFace) {
-        consecutiveMatches = 0;
-        candidateStudent = null;
-        this.scanStatusText.set(analysis?.reason || 'Centra tu rostro dentro del marco ovalado');
+      const students = this.sessionData()?.students || [];
+      const studentsWithFace = students.filter(s => s.hasFaceDescriptor || (s.faceDescriptor && s.faceDescriptor.trim().length > 10));
+
+      if (students.length === 0) {
+        this.scanStatusText.set('No hay alumnos registrados en esta clase.');
         return;
       }
 
-      const capturedDesc = analysis.descriptor;
-      const students = this.sessionData()?.students || [];
+      if (studentsWithFace.length === 0) {
+        this.scanStatusText.set('Los alumnos de esta clase no tienen rostro registrado aún.');
+        return;
+      }
 
-      let bestStudent: Student | null = null;
-      let highestSimilarity = 0;
-      let secondSimilarity = 0;
+      this.isAnalyzingFrame = true;
+      try {
+        const analysis = await FaceBiometrics.processFrame(video);
+        if (!analysis || !analysis.hasFace) {
+          consecutiveMatches = 0;
+          candidateStudent = null;
+          this.scanStatusText.set(analysis?.reason || 'Centra tu rostro dentro del marco ovalado');
+          return;
+        }
 
-      for (const st of students) {
-        const parsedDesc = FaceBiometrics.parseDescriptor(st.faceDescriptor);
-        if (parsedDesc) {
-          const sim = FaceBiometrics.calculateSimilarity(capturedDesc, parsedDesc);
-          if (sim > highestSimilarity) {
-            secondSimilarity = highestSimilarity;
-            highestSimilarity = sim;
-            bestStudent = st;
-          } else if (sim > secondSimilarity) {
-            secondSimilarity = sim;
+        const capturedDesc = analysis.descriptor;
+
+        let bestStudent: Student | null = null;
+        let highestSimilarity = 0;
+        let secondSimilarity = 0;
+
+        for (const st of studentsWithFace) {
+          const parsedDesc = FaceBiometrics.parseDescriptor(st.faceDescriptor);
+          if (parsedDesc) {
+            const sim = FaceBiometrics.calculateSimilarity(capturedDesc, parsedDesc);
+            if (sim > highestSimilarity) {
+              secondSimilarity = highestSimilarity;
+              highestSimilarity = sim;
+              bestStudent = st;
+            } else if (sim > secondSimilarity) {
+              secondSimilarity = sim;
+            }
           }
         }
-      }
 
-      // Umbral calibrado de coincidencia facial (>= 78%)
-      const hasConfidenceMargin = students.length <= 1 || (highestSimilarity - secondSimilarity >= 3);
+        // Umbral calibrado de coincidencia facial (>= 70%)
+        const targetThreshold = 70;
 
-      if (highestSimilarity >= 78 && bestStudent && hasConfidenceMargin) {
-        if (candidateStudent?.id === bestStudent.id) {
-          consecutiveMatches++;
+        if (highestSimilarity >= targetThreshold && bestStudent) {
+          if (candidateStudent?.id === bestStudent.id) {
+            consecutiveMatches++;
+          } else {
+            candidateStudent = bestStudent;
+            consecutiveMatches = 1;
+          }
+          candidateConfidence = highestSimilarity;
+
+          this.scanStatusText.set(`¡Rostro reconocido! ${bestStudent.lastName} ${bestStudent.firstName} (${highestSimilarity}%) [${consecutiveMatches}/2]`);
+
+          // Al confirmar 2 lecturas consecutivas estables (~300ms), registra la asistencia
+          if (consecutiveMatches >= 2) {
+            const size = Math.min(video.videoWidth, video.videoHeight);
+            const startX = (video.videoWidth - size) / 2;
+            const startY = (video.videoHeight - size) / 2;
+            ctx.drawImage(video, startX, startY, size, size, 0, 0, 320, 320);
+            this.executeCheckIn(bestStudent, candidateConfidence, canvas);
+          }
         } else {
-          candidateStudent = bestStudent;
-          consecutiveMatches = 1;
+          consecutiveMatches = 0;
+          candidateStudent = null;
+          if (bestStudent && highestSimilarity > 35) {
+            this.scanStatusText.set(`Analizando: ${bestStudent.lastName} ${bestStudent.firstName} (${highestSimilarity}% / meta: ${targetThreshold}%)`);
+          } else {
+            this.scanStatusText.set('Rostro enfocado. Mantén la mirada fija hacia la cámara...');
+          }
         }
-        candidateConfidence = highestSimilarity;
-
-        this.scanStatusText.set(`¡Rostro reconocido! ${bestStudent.lastName} ${bestStudent.firstName} (${highestSimilarity}%) [${consecutiveMatches}/2]`);
-
-        // Al confirmar 2 lecturas consecutivas seguras (~400ms estable), registra la asistencia
-        if (consecutiveMatches >= 2) {
-          // Captura fotograma final
-          const size = Math.min(video.videoWidth, video.videoHeight);
-          const startX = (video.videoWidth - size) / 2;
-          const startY = (video.videoHeight - size) / 2;
-          ctx.drawImage(video, startX, startY, size, size, 0, 0, 320, 320);
-          this.executeCheckIn(bestStudent, candidateConfidence, canvas);
-        }
-      } else {
-        consecutiveMatches = 0;
-        candidateStudent = null;
-        if (bestStudent && highestSimilarity > 45) {
-          this.scanStatusText.set(`Analizando: ${bestStudent.lastName} ${bestStudent.firstName} (${highestSimilarity}% / meta: 78%)`);
-        } else {
-          this.scanStatusText.set('Rostro enfocado. Mantén la mirada fija hacia la cámara...');
-        }
+      } catch (err) {
+        console.error('Error durante análisis facial:', err);
+      } finally {
+        this.isAnalyzingFrame = false;
       }
-    }, 200);
+    }, 150);
   }
 
   // Registra la asistencia en el backend

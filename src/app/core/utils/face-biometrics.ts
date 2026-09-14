@@ -142,8 +142,8 @@ export class FaceBiometrics {
       }
 
       const avgGrad = sumGrad / (count || 1);
-      // Descarta fotogramas con gradiente muy bajo (desenfoque o movimiento excesivo)
-      return avgGrad >= 4.8;
+      // Descarta fotogramas solo si estan extremadamente oscuros o borrosos
+      return avgGrad >= 1.5;
     } catch {
       return true;
     }
@@ -202,9 +202,9 @@ export class FaceBiometrics {
       const faceWidth = Math.abs(rightCheek.x - leftCheek.x) || 1e-5;
       const faceHeight = Math.abs(chin.y - forehead.y) || 1e-5;
 
-      // 1. Validacion de centrado estricto en el encuadre (dentro del ovalo)
-      const isCenteredX = centerX >= 0.28 && centerX <= 0.72;
-      const isCenteredY = centerY >= 0.18 && centerY <= 0.78;
+      // 1. Validacion de centrado en el encuadre (dentro del ovalo)
+      const isCenteredX = centerX >= 0.18 && centerX <= 0.82;
+      const isCenteredY = centerY >= 0.12 && centerY <= 0.88;
 
       if (!isCenteredX || !isCenteredY) {
         return {
@@ -220,7 +220,7 @@ export class FaceBiometrics {
       }
 
       // 2. Validacion de distancia / escala
-      if (faceWidth < 0.16 || faceHeight < 0.20) {
+      if (faceWidth < 0.12 || faceHeight < 0.15) {
         return {
           hasFace: false,
           isCentered: false,
@@ -233,7 +233,7 @@ export class FaceBiometrics {
         };
       }
 
-      if (faceWidth > 0.88) {
+      if (faceWidth > 0.95) {
         return {
           hasFace: false,
           isCentered: false,
